@@ -1,6 +1,7 @@
 const express = require("express");
 const logger = require("morgan");
 const app = express();
+const cors = require("cors");
 
 let contacts = [
   {
@@ -21,6 +22,7 @@ let contacts = [
 ];
 
 // middleware
+app.use(cors());
 app.use(express.json());
 app.use(logger("tiny"));
 logger.token("body", (req, res) => JSON.stringify(req.body));
@@ -80,6 +82,6 @@ app.post("/api/persons", (req, res) => {
   return res.json(contact);
 });
 
-const port = 3002;
+const PORT = process.env.port || 3002;
 
-app.listen(port);
+app.listen(PORT);
