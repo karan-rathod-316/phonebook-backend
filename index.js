@@ -33,7 +33,7 @@ app.use(
 );
 
 // routes
-app.get("/api/persons", (req, res) => {
+app.get("/api/contacts", (req, res) => {
   res.json(contacts);
 });
 
@@ -44,7 +44,7 @@ app.get("/info", (req, res) => {
   res.json(response);
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/contacts/:id", (req, res) => {
   let id = +req.params.id;
   let response = contacts.find((contact) => contact.id === id);
   if (response) {
@@ -54,13 +54,13 @@ app.get("/api/persons/:id", (req, res) => {
   }
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/contacts/:id", (req, res) => {
   let id = +req.params.id;
   contacts = contacts.filter((contact) => contact.id !== id);
   return res.status(204).end();
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/contacts", (req, res) => {
   // error handling
   let checkIfContactExists = contacts.find(
     (contact) => contact.name === req.body.name
