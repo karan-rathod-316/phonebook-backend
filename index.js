@@ -82,6 +82,6 @@ app.post("/api/persons", (req, res) => {
   return res.json(contact);
 });
 
-const PORT = process.env.port || 3002;
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT);
