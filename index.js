@@ -1,30 +1,15 @@
+require("dotenv").config();
 const express = require("express");
 const logger = require("morgan");
 const app = express();
 const cors = require("cors");
-
-let contacts = [
-  {
-    name: "Arto Hellas",
-    number: "040-123456",
-    id: 1,
-  },
-  {
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-    id: 2,
-  },
-  {
-    name: "Dan Abramov",
-    number: "12-43-234345",
-    id: 3,
-  },
-];
+const Contact = require("./models/contact");
 
 // middleware
 app.use(express.static("build"));
-app.use(cors());
 app.use(express.json());
+
+app.use(cors());
 app.use(logger("tiny"));
 logger.token("body", (req, res) => JSON.stringify(req.body));
 app.use(
@@ -35,53 +20,84 @@ app.use(
 
 // routes
 app.get("/api/contacts", (req, res) => {
-  res.json(contacts);
+  Contact.find({}).then((contacts) => {
+    res.json(contacts);
+  });
 });
 
 app.get("/info", (req, res) => {
-  let response = `Phonebook has info for ${
-    contacts.length - 1
-  } people ${new Date()}`;
-  res.json(response);
-});
-
-app.get("/api/contacts/:id", (req, res) => {
-  let id = +req.params.id;
-  let response = contacts.find((contact) => contact.id === id);
-  if (response) {
+  let contactsLength;
+  Contact.find({}).then((contacts) => {
+    let response = `Phonebook has info for ${
+      contacts.length
+    } people - ${new Date()}`;
     res.json(response);
-  } else {
-    res.status(404).end();
+  });
+});
+
+app.get("/api/contacts/:id", (req, res, next) => {
+  let id = req.params.id;
+  Contact.findById((id) => contact.id === id)
+    .then((contact) => {
+      if (contact) {
+        res.json(contact);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => {
+      return next(error);
+    });
+});
+
+app.delete("/api/contacts/:id", (req, res, next) => {
+  Contact.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => {
+      next(error);
+    });
+});
+
+app.post("/api/contacts", (req, res, next) => {
+  const body = req.body;
+  if (body.name === undefined || body.number === undefined) {
+    return res.status(400).json({ error: "name or number are missing" });
   }
+
+  const contact = new Contact({
+    name: body.name,
+    number: body.number,
+  });
+  contact
+    .save()
+    .then((savedContact) => {
+      res.json(savedContact);
+    })
+    .catch((error) => next(error));
 });
 
-app.delete("/api/contacts/:id", (req, res) => {
-  let id = +req.params.id;
-  contacts = contacts.filter((contact) => contact.id !== id);
-  return res.status(204).end();
+app.put("/api/contacts/:id", (req, res, next) => {
+  const body = req.body;
+  const updatedContact = {
+    name: req.body.name,
+    number: req.body.number,
+  };
+
+  Contact.findByIdAndUpdate(req.params.id, updatedContact, { new: true })
+    .then((updatedContact) => res.json(updatedContact))
+    .catch((err) => next(err));
 });
 
-app.post("/api/contacts", (req, res) => {
-  // error handling
-  let checkIfContactExists = contacts.find(
-    (contact) => contact.name === req.body.name
-  );
-
-  if (checkIfContactExists) {
-    res.status(400).send({ error: "name must be unique" });
-  } else if (!req.body.name) {
-    res.status(400).send({ error: "name is missing" });
-  } else if (!req.body.number) {
-    res.status(400).send({ error: "number is missing" });
+const errorHandler = (error, req, res, next) => {
+  if ((error.name = "CastError")) {
+    return res.status(400).send({ error: "malformatted id" });
   }
+  next(error);
+};
 
-  // adding a new entry
-  let id = Math.floor(Math.random() * Math.floor(Math.random() * Date.now()));
-  let contact = req.body;
-  contact.id = id;
-  contacts = contacts.concat(contact);
-  return res.json(contact);
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3002;
 

@@ -9,7 +9,7 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2];
 
-const url = `mongodb+srv://phonebook:${password}@phonebook-cluster.eclug.mongodb.net/contacts?retryWrites=true&w=majority`;
+const url = `mongodb+srv://fullstack:${password}@phonebook-cluster.eclug.mongodb.net/phonebook?retryWrites=true&w=majority`;
 
 mongoose.connect(url, {
   useNewUrlParser: true,
@@ -30,9 +30,9 @@ const contact = new Contact({
   number: +`${process.argv[4]}`,
 });
 
-// contact.save().then((result) => {
-//   mongoose.connection.close();
-// });
+contact.save().then((result) => {
+  mongoose.connection.close();
+});
 
 if (!process.argv[4]) {
   Contact.find({}).then((result) =>
