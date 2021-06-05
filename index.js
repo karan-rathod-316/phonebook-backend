@@ -19,20 +19,24 @@ app.use(
 );
 
 // routes
-app.get("/api/contacts", (req, res) => {
-  Contact.find({}).then((contacts) => {
-    res.json(contacts);
-  });
+app.get("/api/contacts", (req, res, next) => {
+  Contact.find({})
+    .then((contacts) => {
+      res.json(contacts);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
   let contactsLength;
-  Contact.find({}).then((contacts) => {
-    let response = `Phonebook has info for ${
-      contacts.length
-    } people - ${new Date()}`;
-    res.json(response);
-  });
+  Contact.find({})
+    .then((contacts) => {
+      let response = `Phonebook has info for ${
+        contacts.length
+      } people - ${new Date()}`;
+      res.json(response);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/contacts/:id", (req, res, next) => {
@@ -62,9 +66,6 @@ app.delete("/api/contacts/:id", (req, res, next) => {
 
 app.post("/api/contacts", (req, res, next) => {
   const body = req.body;
-  if (body.name === undefined || body.number === undefined) {
-    return res.status(400).json({ error: "name or number are missing" });
-  }
 
   const contact = new Contact({
     name: body.name,
@@ -85,14 +86,19 @@ app.put("/api/contacts/:id", (req, res, next) => {
     number: req.body.number,
   };
 
-  Contact.findByIdAndUpdate(req.params.id, updatedContact, { new: true })
+  Contact.findByIdAndUpdate(req.params.id, updatedContact, {
+    new: true,
+  })
     .then((updatedContact) => res.json(updatedContact))
     .catch((err) => next(err));
 });
 
 const errorHandler = (error, req, res, next) => {
-  if ((error.name = "CastError")) {
-    return res.status(400).send({ error: "malformatted id" });
+  console.log(error.name);
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "Malformatted Id" });
+  } else if (error.name === "ValidationError") {
+    return res.status(400).json({ error: "Invalid Name or Number." });
   }
   next(error);
 };
