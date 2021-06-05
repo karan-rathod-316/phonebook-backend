@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.use(cors());
 app.use(logger("tiny"));
-logger.token("body", (req, res) => JSON.stringify(req.body));
+logger.token("body", (req) => JSON.stringify(req.body));
 app.use(
   logger(
     ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]"
@@ -28,7 +28,6 @@ app.get("/api/contacts", (req, res, next) => {
 });
 
 app.get("/info", (req, res, next) => {
-  let contactsLength;
   Contact.find({})
     .then((contacts) => {
       let response = `Phonebook has info for ${
@@ -41,7 +40,8 @@ app.get("/info", (req, res, next) => {
 
 app.get("/api/contacts/:id", (req, res, next) => {
   let id = req.params.id;
-  Contact.findById((id) => contact.id === id)
+  console.log(req.params.id);
+  Contact.findById(id)
     .then((contact) => {
       if (contact) {
         res.json(contact);
@@ -56,7 +56,7 @@ app.get("/api/contacts/:id", (req, res, next) => {
 
 app.delete("/api/contacts/:id", (req, res, next) => {
   Contact.findByIdAndRemove(req.params.id)
-    .then((result) => {
+    .then(() => {
       res.status(204).end();
     })
     .catch((error) => {
@@ -80,7 +80,6 @@ app.post("/api/contacts", (req, res, next) => {
 });
 
 app.put("/api/contacts/:id", (req, res, next) => {
-  const body = req.body;
   const updatedContact = {
     name: req.body.name,
     number: req.body.number,

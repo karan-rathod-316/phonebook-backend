@@ -1,44 +1,46 @@
-const mongoose = require("mongoose");
+// ***testing playground***
 
-if (process.argv.length < 3) {
-  console.log(
-    "Please provide the password as an argument: node mongo.js <password>"
-  );
-  process.exit(1);
-}
+// const mongoose = require("mongoose");
 
-const password = process.argv[2];
+// if (process.argv.length < 3) {
+//   console.log(
+//     "Please provide the password as an argument: node mongo.js <password>"
+//   );
+//   process.exit(1);
+// }
 
-const url = `mongodb+srv://fullstack:${password}@phonebook-cluster.eclug.mongodb.net/phonebook?retryWrites=true&w=majority`;
+// const password = process.argv[2];
 
-mongoose.connect(url, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-  useCreateIndex: true,
-});
+// const url = `mongodb+srv://fullstack:${password}@phonebook-cluster.eclug.mongodb.net/phonebook?retryWrites=true&w=majority`;
 
-const contactSchema = new mongoose.Schema({
-  name: String,
-  number: Number,
-});
+// mongoose.connect(url, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   useFindAndModify: false,
+//   useCreateIndex: true,
+// });
 
-const Contact = mongoose.model("Contact", contactSchema);
+// const contactSchema = new mongoose.Schema({
+//   name: String,
+//   number: Number,
+// });
 
-const contact = new Contact({
-  name: `${process.argv[3]}`,
-  number: +`${process.argv[4]}`,
-});
+// const Contact = mongoose.model("Contact", contactSchema);
 
-contact.save().then((result) => {
-  mongoose.connection.close();
-});
+// const contact = new Contact({
+//   name: `${process.argv[3]}`,
+//   number: +`${process.argv[4]}`,
+// });
 
-if (!process.argv[4]) {
-  Contact.find({}).then((result) =>
-    result.forEach((res) => {
-      console.log(res);
-      mongoose.connection.close();
-    })
-  );
-}
+// contact.save().then((result) => {
+//   mongoose.connection.close();
+// });
+
+// if (!process.argv[4]) {
+//   Contact.find({}).then((result) =>
+//     result.forEach((res) => {
+//       console.log(res);
+//       mongoose.connection.close();
+//     })
+//   );
+// }
